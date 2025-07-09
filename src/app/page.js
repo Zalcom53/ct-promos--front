@@ -1,32 +1,120 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 export default function Home() {
+  const router = useRouter();
+
   const [formData, setFormData] = useState({
     producto: "",
     importe: "",
     moneda: 0,
     fechaInicio: "",
     fechaFin: "",
-    estatus: "",
+    estatus: "1", // Por defecto pendiente
     comentario: "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Datos del formulario:", formData);
-    // Aquí puedes hacer un POST a tu backend
+  const validateForm = () => {
+    const { producto, importe, fechaInicio, fechaFin, estatus } = formData;
+
+    if (!producto.trim()) {
+      alert("El campo Producto es obligatorio.");
+      return false;
+    }
+
+    if (importe === "" || isNaN(importe) || Number(importe) <= 0) {
+      alert("El Importe debe ser un número positivo.");
+      return false;
+    }
+
+    if (!fechaInicio) {
+      alert("La Fecha de inicio es obligatoria.");
+      return false;
+    }
+
+    if (!fechaFin) {
+      alert("La Fecha de fin es obligatoria.");
+      return false;
+    }
+
+    if (new Date(fechaFin) < new Date(fechaInicio)) {
+      alert("La Fecha de fin no puede ser menor que la Fecha de inicio.");
+      return false;
+    }
+
+    const estatusNum = Number(estatus);
+    if (
+      estatus === "" ||
+      isNaN(estatusNum) ||
+      estatusNum < 1 ||
+      estatusNum > 4
+    ) {
+      alert("Estatus debe ser un número entre 1 y 4.");
+      return false;
+    }
+
+    return true;
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return; // No continuar si no pasa validación
+    }
+
+    try {
+      const res = await fetch("/api/producto", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          importe: Number(formData.importe),
+          estatus: Number(formData.estatus),
+        }),
+      });
+
+      if (res.ok) {
+        await res.json();
+        alert("Datos guardados correctamente");
+        setFormData({
+          producto: "",
+          importe: "",
+          moneda: 0,
+          fechaInicio: "",
+          fechaFin: "",
+          estatus: "1",
+          comentario: "",
+        });
+      } else {
+        alert("Error al guardar los datos");
+      }
+    } catch (err) {
+      console.error("Error de red:", err);
+      alert("Error al conectar con el servidor");
+    }
+  };
+
+  const irAlVisualizador = () => {
+    router.push("/visualizador");
+  };
+  const irAlVisualizadorSolicitante = () => {
+    router.push("/visualizador-solicitante");
+  }
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
@@ -40,7 +128,6 @@ export default function Home() {
           priority
         />
 
-        {/* Formulario */}
         <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
           <label className="flex flex-col text-sm">
             Producto
@@ -63,8 +150,9 @@ export default function Home() {
               value={formData.importe}
               onChange={handleChange}
               required
-              className="border rounded px-2 py-1 mt-1"
               step="0.01"
+              min="0"
+              className="border rounded px-2 py-1 mt-1"
             />
           </label>
 
@@ -112,6 +200,8 @@ export default function Home() {
               name="estatus"
               value={formData.estatus}
               onChange={handleChange}
+              min={1}
+              max={4}
               required
               className="border rounded px-2 py-1 mt-1"
             />
@@ -124,8 +214,8 @@ export default function Home() {
               value={formData.comentario}
               onChange={handleChange}
               maxLength={255}
-              className="border rounded px-2 py-1 mt-1"
               rows={3}
+              className="border rounded px-2 py-1 mt-1"
             />
           </label>
 
@@ -135,12 +225,24 @@ export default function Home() {
           >
             Enviar
           </button>
+
+          <button
+            type="button"
+            onClick={irAlVisualizador}
+            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
+          >
+            Ir al visualizador de promociones
+          </button>
+
+          <button
+            type="button"
+            onClick={irAlVisualizadorSolicitante}
+            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
+          >
+            Seguimiento promociones
+          </button>
         </form>
       </main>
-
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        {}
-      </footer>
     </div>
   );
 }
