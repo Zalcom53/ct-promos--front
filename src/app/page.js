@@ -4,6 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
+//extra cargar solicitud de un archivo de excel
+import * as XLSX from 'xlsx';
+
+
+
+
 export default function Home() {
   const router = useRouter();
 
@@ -13,7 +19,7 @@ export default function Home() {
     moneda: 0,
     fechaInicio: "",
     fechaFin: "",
-    estatus: "1", // Por defecto pendiente
+    estatus: "1", 
     comentario: "",
   });
 
@@ -72,7 +78,7 @@ export default function Home() {
     e.preventDefault();
 
     if (!validateForm()) {
-      return; // No continuar si no pasa validación
+      return; 
     }
 
     try {
@@ -236,7 +242,7 @@ export default function Home() {
 
           <button
             type="button"
-            onClick={irAlVisualizadorSolicitante}
+            onClick={irAlVisualizadorSolicitante  }
             className="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
           >
             Seguimiento promociones

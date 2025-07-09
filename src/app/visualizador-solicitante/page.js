@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
 
 export default function VisualizadorSolicitante() {
   const [productos, setProductos] = useState([]);
@@ -8,7 +10,14 @@ export default function VisualizadorSolicitante() {
   useEffect(() => {
     fetch("/api/producto")
       .then((res) => res.json())
-      .then((data) => setProductos(data))
+      .then((data) => {
+        const productosTransformados = data.map((prod) => ({
+          ...prod,
+          fechaInicio: prod.fecha_inicio ? prod.fecha_inicio.split("T")[0] : "",
+          fechaFin: prod.fecha_fin ? prod.fecha_fin.split("T")[0] : "",
+        }));
+        setProductos(productosTransformados);
+      })
       .catch((err) => console.error("Error al obtener productos:", err));
   }, []);
 
@@ -26,11 +35,27 @@ export default function VisualizadorSolicitante() {
       return;
     }
 
+    if (new Date(producto.fechaFin) < new Date(producto.fechaInicio)) {
+      alert("La fecha de fin no puede ser menor que la fecha de inicio.");
+      return;
+    }
+
     try {
+      const body = {
+        id: producto.id,
+        producto: producto.producto,
+        importe: Number(producto.importe),
+        moneda: producto.moneda,
+        fechaInicio: producto.fechaInicio,
+        fechaFin: producto.fechaFin,
+        estatus: producto.estatus,
+        comentario: producto.comentario,
+      };
+
       const res = await fetch("/api/producto", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(producto),
+        body: JSON.stringify(body),
       });
 
       if (res.ok) {
@@ -43,10 +68,16 @@ export default function VisualizadorSolicitante() {
       alert("Error del servidor.");
     }
   };
-
+const irAlVisualizador = () => {
+    router.push("/visualizador");
+  };
+  const irAlVisualizadorSolicitante = () => {
+    router.push("/visualizador-solicitante");
+  }
   return (
     <div className="p-8">
       <h1 className="text-xl font-bold mb-4">Panel del Solicitante</h1>
+      
       <table className="w-full border-collapse">
         <thead>
           <tr className="bg-gray-200 text-left">
@@ -88,8 +119,8 @@ export default function VisualizadorSolicitante() {
               <td className="p-2 border">
                 <input
                   type="date"
-                  value={prod.fecha_inicio.split("T")[0]}
-                  onChange={(e) => handleChange(index, "fecha_inicio", e.target.value)}
+                  value={prod.fechaInicio}
+                  onChange={(e) => handleChange(index, "fechaInicio", e.target.value)}
                   disabled={prod.estatus !== 1}
                   className="border rounded px-2 py-1 w-full"
                 />
@@ -97,21 +128,19 @@ export default function VisualizadorSolicitante() {
               <td className="p-2 border">
                 <input
                   type="date"
-                  value={prod.fecha_fin.split("T")[0]}
-                  onChange={(e) => handleChange(index, "fecha_fin", e.target.value)}
+                  value={prod.fechaFin}
+                  onChange={(e) => handleChange(index, "fechaFin", e.target.value)}
                   disabled={prod.estatus !== 1}
                   className="border rounded px-2 py-1 w-full"
                 />
               </td>
               <td className="p-2 border">
-                {
-                  {
-                    1: "Pendiente",
-                    2: "Activa",
-                    3: "Completada",
-                    4: "Rechazada",
-                  }[prod.estatus]
-                }
+                {{
+                  1: "Pendiente",
+                  2: "Activa",
+                  3: "Completada",
+                  4: "Rechazada",
+                }[prod.estatus]}
               </td>
               <td className="p-2 border">
                 {prod.estatus === 4 ? (
@@ -125,9 +154,7 @@ export default function VisualizadorSolicitante() {
                   onClick={() => handleUpdate(index)}
                   disabled={prod.estatus !== 1}
                   className={`px-3 py-1 rounded text-white ${
-                    prod.estatus !== 1
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-blue-600 hover:bg-blue-700"
+                    prod.estatus !== 1 ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
                   }`}
                 >
                   Guardar
@@ -137,6 +164,7 @@ export default function VisualizadorSolicitante() {
           ))}
         </tbody>
       </table>
+      
     </div>
   );
 }

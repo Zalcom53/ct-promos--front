@@ -24,7 +24,7 @@ export async function POST(request) {
       moneda,
       fechaInicio,
       fechaFin,
-      estatus = 1, // Por defecto: pendiente
+      estatus = 1, 
       comentario,
     } = data;
 

@@ -70,6 +70,7 @@ export default function Visualizador() {
   return (
     <div className="p-8">
       <h1 className="text-xl font-bold mb-4">Visualizador de Promociones</h1>
+      
       <table className="w-full border-collapse">
         <thead>
           <tr className="bg-gray-200 text-left">
@@ -135,10 +136,12 @@ export default function Visualizador() {
                   Actualizar
                 </button>
               </td>
-            </tr>
+            </tr> 
+            
           ))}
         </tbody>
       </table>
+      
     </div>
   );
 }
