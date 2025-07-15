@@ -6,7 +6,7 @@ export default function Visualizador() {
   const [productos, setProductos] = useState([]);
 
   useEffect(() => {
-    fetch("/api/producto")
+    fetch("http://localhost:8080/src/routes/producto.php")
       .then((res) => res.json())
       .then((data) => setProductos(data))
       .catch((err) => console.error("Error al obtener productos:", err));
@@ -21,7 +21,7 @@ export default function Visualizador() {
   const handleUpdate = async (index) => {
     const producto = productos[index];
 
-    if (producto.estatus !== 1 && producto.estatus !== "1") {
+    if (producto.estatus !== "1" && producto.estatus !== 1) {
       alert("Solo se pueden modificar productos con estatus pendiente.");
       return;
     }
@@ -38,7 +38,7 @@ export default function Visualizador() {
     }
 
     try {
-      const res = await fetch("/api/producto", {
+      const res = await fetch("http://localhost:8080/src/routes/producto.php", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -92,14 +92,19 @@ export default function Visualizador() {
               <td className="p-2 border">{prod.id}</td>
               <td className="p-2 border">{prod.producto}</td>
               <td className="p-2 border">{prod.importe}</td>
-              <td className="p-2 border">{prod.moneda === 0 ? "MXN" : "USD"}</td>
-              <td className="p-2 border">{prod.fecha_inicio.split("T")[0]}</td>
-              <td className="p-2 border">{prod.fecha_fin.split("T")[0]}</td>
+              <td className="p-2 border">{prod.moneda === "0" || prod.moneda === 0 ? "MXN" : "USD"}</td>
+              <td className="p-2 border">{prod.fecha_inicio?.split("T")[0]}</td>
+              <td className="p-2 border">{prod.fecha_fin?.split("T")[0]}</td>
               <td className="p-2 border">
-                {{ 1: "Pendiente", 2: "Activa", 3: "Completada", 4: "Rechazada" }[prod.estatus]}
+                {{
+                  1: "Pendiente",
+                  2: "Activa",
+                  3: "Completada",
+                  4: "Rechazada",
+                }[prod.estatus]}
               </td>
               <td className="p-2 border">
-                {prod.estatus === 1 ? (
+                {prod.estatus === "1" || prod.estatus === 1 ? (
                   <select
                     value={prod.nuevoEstatus || ""}
                     onChange={(e) => handleChange(index, "nuevoEstatus", e.target.value)}
@@ -118,7 +123,7 @@ export default function Visualizador() {
                 <textarea
                   value={prod.comentario || ""}
                   onChange={(e) => handleChange(index, "comentario", e.target.value)}
-                  disabled={prod.estatus !== 1}
+                  disabled={prod.estatus !== "1" && prod.estatus !== 1}
                   className="border rounded px-2 py-1 w-full"
                   rows={2}
                 />
@@ -126,9 +131,9 @@ export default function Visualizador() {
               <td className="p-2 border">
                 <button
                   onClick={() => handleUpdate(index)}
-                  disabled={prod.estatus !== 1}
+                  disabled={prod.estatus !== "1" && prod.estatus !== 1}
                   className={`px-3 py-1 rounded text-white ${
-                    prod.estatus !== 1
+                    prod.estatus !== "1" && prod.estatus !== 1
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-green-600 hover:bg-green-700"
                   }`}
@@ -136,12 +141,10 @@ export default function Visualizador() {
                   Actualizar
                 </button>
               </td>
-            </tr> 
-            
+            </tr>
           ))}
         </tbody>
       </table>
-      
     </div>
   );
 }

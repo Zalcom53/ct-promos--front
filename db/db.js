@@ -1,12 +1,12 @@
-// db/db.js
-import { Pool } from 'pg';
+// // db/db.js
+// import { Pool } from 'pg';
 
-const pool = new Pool({
-  user: 'postgres',      // ← tu usuario de PostgreSQL
-  host: 'localhost',
-  database: 'productos_db',
-  password: 'contraseña', // ← tu contraseña
-  port: 5432,               // Puerto por defecto
-});
+// const pool = new Pool({
+//   user: 'postgres',      
+//   host: 'localhost',
+//   database: 'productos_db',
+//   password: 'contraseña', 
+//   port: 5432,               
+// });
 
-export default pool;
+// export default pool;

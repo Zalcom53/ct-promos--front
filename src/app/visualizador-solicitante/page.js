@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-
 export default function VisualizadorSolicitante() {
+  const router = useRouter();
   const [productos, setProductos] = useState([]);
 
   useEffect(() => {
-    fetch("/api/producto")
+    fetch("http://localhost:8080/src/routes/producto.php") 
       .then((res) => res.json())
       .then((data) => {
         const productosTransformados = data.map((prod) => ({
@@ -52,7 +52,7 @@ export default function VisualizadorSolicitante() {
         comentario: producto.comentario,
       };
 
-      const res = await fetch("/api/producto", {
+      const res = await fetch("http://localhost:8080/src/routes/producto.php", { 
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -68,16 +68,18 @@ export default function VisualizadorSolicitante() {
       alert("Error del servidor.");
     }
   };
-const irAlVisualizador = () => {
+
+  const irAlVisualizador = () => {
     router.push("/visualizador");
   };
   const irAlVisualizadorSolicitante = () => {
     router.push("/visualizador-solicitante");
-  }
+  };
+
   return (
     <div className="p-8">
       <h1 className="text-xl font-bold mb-4">Panel del Solicitante</h1>
-      
+
       <table className="w-full border-collapse">
         <thead>
           <tr className="bg-gray-200 text-left">
@@ -101,7 +103,7 @@ const irAlVisualizador = () => {
                   type="text"
                   value={prod.producto}
                   onChange={(e) => handleChange(index, "producto", e.target.value)}
-                  disabled={prod.estatus !== 1}
+                  disabled={prod.estatus !== 1 && prod.estatus !== "1"}
                   className="border rounded px-2 py-1 w-full"
                 />
               </td>
@@ -111,17 +113,17 @@ const irAlVisualizador = () => {
                   step="0.01"
                   value={prod.importe}
                   onChange={(e) => handleChange(index, "importe", e.target.value)}
-                  disabled={prod.estatus !== 1}
+                  disabled={prod.estatus !== 1 && prod.estatus !== "1"}
                   className="border rounded px-2 py-1 w-full"
                 />
               </td>
-              <td className="p-2 border">{prod.moneda === 0 ? "MXN" : "USD"}</td>
+              <td className="p-2 border">{prod.moneda === 0 || prod.moneda === "0" ? "MXN" : "USD"}</td>
               <td className="p-2 border">
                 <input
                   type="date"
                   value={prod.fechaInicio}
                   onChange={(e) => handleChange(index, "fechaInicio", e.target.value)}
-                  disabled={prod.estatus !== 1}
+                  disabled={prod.estatus !== 1 && prod.estatus !== "1"}
                   className="border rounded px-2 py-1 w-full"
                 />
               </td>
@@ -130,7 +132,7 @@ const irAlVisualizador = () => {
                   type="date"
                   value={prod.fechaFin}
                   onChange={(e) => handleChange(index, "fechaFin", e.target.value)}
-                  disabled={prod.estatus !== 1}
+                  disabled={prod.estatus !== 1 && prod.estatus !== "1"}
                   className="border rounded px-2 py-1 w-full"
                 />
               </td>
@@ -143,7 +145,7 @@ const irAlVisualizador = () => {
                 }[prod.estatus]}
               </td>
               <td className="p-2 border">
-                {prod.estatus === 4 ? (
+                {prod.estatus === 4 || prod.estatus === "4" ? (
                   <span className="text-red-600">{prod.comentario || "(Sin comentario)"}</span>
                 ) : (
                   <span className="text-gray-500 italic">N/A</span>
@@ -152,9 +154,11 @@ const irAlVisualizador = () => {
               <td className="p-2 border">
                 <button
                   onClick={() => handleUpdate(index)}
-                  disabled={prod.estatus !== 1}
+                  disabled={prod.estatus !== 1 && prod.estatus !== "1"}
                   className={`px-3 py-1 rounded text-white ${
-                    prod.estatus !== 1 ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                    prod.estatus !== 1 && prod.estatus !== "1"
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700"
                   }`}
                 >
                   Guardar
@@ -164,7 +168,6 @@ const irAlVisualizador = () => {
           ))}
         </tbody>
       </table>
-      
     </div>
   );
 }
